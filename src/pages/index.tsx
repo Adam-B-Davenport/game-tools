@@ -91,11 +91,11 @@ const Main = (props: { chars: Array<Character> }) => {
     const nextTurn = NextTurn()
     if (nextTurn.length > 0 || turn > 1) {
       if (nextTurn.length > 0) {
-        nextTurn[nextTurn.length - 1, 1]!.isDone = false
+        nextTurn[nextTurn.length - 1]!.isDone = false
       }
       else {
         let currentTurn = CurrentTurn()
-        let last = currentTurn[nextTurn.length - 1, 1]
+        let last = currentTurn[nextTurn.length - 1]
         characters.map(c => c.isDone = true)
         last!.isDone = false
         setTurn(turn - 1)
@@ -104,12 +104,21 @@ const Main = (props: { chars: Array<Character> }) => {
     updateCharacters()
   }
 
+  const currentTurnDisplay = () => {
+    if (turn === 1){
+      return CurrentTurn().slice(0,1)
+    }
+    else{
+      return CurrentTurn()
+    }
+  }
+
   if (!edit) {
     return (
       <div className="App">
         <h1>Turn {turn}</h1>
         <div className='initiativeList'>
-          {CurrentTurn().map(char => <CharacterDisplay character={char} key={char.id} />)}
+          {currentTurnDisplay().map(char => <CharacterDisplay character={char} key={char.id} />)}
           <hr className='turnDivider' />
           {NextTurn().map(char => <CharacterDisplay character={char} key={char.id} />)}
         </div>
