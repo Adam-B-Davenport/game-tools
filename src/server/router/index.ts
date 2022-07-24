@@ -4,13 +4,35 @@ import superjson from "superjson";
 
 import { exampleRouter } from "./example";
 import { authRouter } from "./auth";
-import { Character } from '@prisma/client'
+import { Character, Party } from '@prisma/client'
 
 export const appRouter = createRouter()
   .transformer(superjson)
   .query("getAll", {
     async resolve({ ctx }) {
-      return await ctx.prisma.character.findMany();
+      // Todo - add party creation/selection
+      let party = await ctx.prisma.party.findFirst()
+      if (party === null){
+        party = await ctx.prisma.party.create({
+          data: {
+            name: "Buckleberry Bandits",
+            round: 1,
+          }
+        })
+      }
+      const characters = await ctx.prisma.character.findMany();
+      return {characters: characters, party: party}
+    }
+  })
+  .mutation("updateParty", {
+    input: (val: unknown) => {
+      return val as Party
+    },
+    async resolve({input, ctx}){
+      return await ctx.prisma.party.update({
+        data: input,
+        where: {id: input.id}
+      })
     }
   })
   .mutation("updateCharacter", {

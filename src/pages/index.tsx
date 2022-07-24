@@ -1,9 +1,9 @@
 import type { NextPage } from "next";
 import { trpc } from "../utils/trpc";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import CharacterDisplay from '../components/CharacterDisplay';
 import Editor from '../components/Edit';
-import { Character } from "@prisma/client";
+import { Character, Party } from "@prisma/client";
 //import styles from '../styles/Home.module.css'
 
 const InitCompare = (a: Character, b: Character) => {
@@ -20,12 +20,13 @@ const NextFilter = (c: Character) => {
 }
 
 
-const Main = (props: { chars: Array<Character> }) => {
+const Main = (props: { chars: Array<Character>, party: Party }) => {
   const [characters, setChars] = useState(props.chars.sort(InitCompare))
-  const [turn, setTurn] = useState(1)
+  const [turn, setTurn] = useState(props.party.round)
   const [edit, setEdit] = useState(false)
   const post = trpc.useMutation(['addCharacter'])
   const update = trpc.useMutation(['updateCharacter'])
+  const partyMut = trpc.useMutation(['updateParty'])
 
   const CurrentTurn = () => {
     return characters.filter(CurrentFilter).sort(InitCompare)
@@ -35,13 +36,8 @@ const Main = (props: { chars: Array<Character> }) => {
   }
   const updateCharacters = async () => {
     for (let i = 0; i < characters.length; i++) {
-      try {
-        await update.mutateAsync(characters[i] as Character)
-      }
-      catch {
-        console.log('prisma failed')
-
-      }
+      update.mutateAsync(characters[i] as Character)
+        .catch(() => console.log('failed to update character'))
     }
     setChars(characters)
   }
@@ -72,6 +68,8 @@ const Main = (props: { chars: Array<Character> }) => {
     setEdit(false)
     characters.map(c => c.isDone = false)
     updateCharacters()
+    props.party.round = 1
+    partyMut.mutateAsync(props.party)
     setTurn(1)
   }
 
@@ -83,6 +81,8 @@ const Main = (props: { chars: Array<Character> }) => {
     else {
       characters.map(c => c.isDone = false)
       updateCharacters()
+      props.party.round = turn + 1
+      partyMut.mutateAsync(props.party)
       setTurn(turn + 1)
     }
     updateCharacters()
@@ -98,6 +98,8 @@ const Main = (props: { chars: Array<Character> }) => {
         let last = currentTurn[nextTurn.length - 1]
         characters.map(c => c.isDone = true)
         last!.isDone = false
+        props.party.round = turn - 1
+        partyMut.mutateAsync(props.party)
         setTurn(turn - 1)
       }
     }
@@ -105,10 +107,10 @@ const Main = (props: { chars: Array<Character> }) => {
   }
 
   const currentTurnDisplay = () => {
-    if (turn === 1){
-      return CurrentTurn().slice(0,1)
+    if (turn === 1) {
+      return CurrentTurn().slice(0, 1)
     }
-    else{
+    else {
       return CurrentTurn()
     }
   }
@@ -147,9 +149,9 @@ const Main = (props: { chars: Array<Character> }) => {
 }
 
 const Home: NextPage = () => {
-  const test = trpc.useQuery(['getAll'])
-  if (test.data) {
-    return <Main chars={test.data} />
+  const data = trpc.useQuery(['getAll'])
+  if (data.data && data.data.party !== null) {
+    return <Main chars={data.data.characters} party={data.data.party} />
   }
   else {
     return <h1>Loading...</h1>
