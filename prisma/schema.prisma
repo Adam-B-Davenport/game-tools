@@ -8,7 +8,7 @@ generator client {
 
 // NOTE: sqlite does not work with NextAuth.js
 datasource db {
-    provider = "sqlite"
+    provider = "postgresql"
     url      = env("DATABASE_URL")
 }
 
