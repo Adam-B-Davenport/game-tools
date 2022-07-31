@@ -11,7 +11,7 @@ const InitiativeDisplay = ({current, next, turn} : {current: Array<Character>, n
     return(
     <div className='initiativeList'>
       {current.slice(0,1).map(char => <CharacterDisplay character={char} key={char.id} />)}
-      {current.slice(1,current.length).map(() => <div className="fog character"/>)}
+      {current.slice(1,current.length).map((char) => <div className="fog character" key={char.id}/>)}
       <hr className='turnDivider' />
       {next.map(char => <CharacterDisplay character={char} key={char.id} />)}
     </div>
