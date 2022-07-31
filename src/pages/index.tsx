@@ -4,36 +4,56 @@ import { useState } from 'react';
 import CharacterDisplay from '../components/CharacterDisplay';
 import Editor from '../components/Edit';
 import { Character, Party } from "@prisma/client";
-//import styles from '../styles/Home.module.css'
 
-const InitCompare = (a: Character, b: Character) => {
-  return b.initiative - a.initiative
 
+const InitiativeDisplay = ({current, next, turn} : {current: Array<Character>, next: Array<Character>, turn: number}) => {
+  if (turn ===1){
+    return(
+    <div className='initiativeList'>
+      {current.slice(0,1).map(char => <CharacterDisplay character={char} key={char.id} />)}
+      {current.slice(1,current.length).map(() => <div className="fog character"/>)}
+      <hr className='turnDivider' />
+      {next.map(char => <CharacterDisplay character={char} key={char.id} />)}
+    </div>
+    )
+  }
+  return (
+    <div className='initiativeList'>
+      {current.map(char => <CharacterDisplay character={char} key={char.id} />)}
+      <hr className='turnDivider' />
+      {next.map(char => <CharacterDisplay character={char} key={char.id} />)}
+    </div>
+  )
 }
 
-const CurrentFilter = (c: Character) => {
+const initCompare = (a: Character, b: Character) => {
+  return b.initiative - a.initiative
+}
+
+const currentFilter = (c: Character) => {
   return !c.isDone
 }
 
-const NextFilter = (c: Character) => {
+const nextFilter = (c: Character) => {
   return c.isDone
 }
 
-
 const Main = (props: { chars: Array<Character>, party: Party }) => {
-  const [characters, setChars] = useState(props.chars.sort(InitCompare))
+  const [characters, setChars] = useState(props.chars.sort(initCompare))
   const [turn, setTurn] = useState(props.party.round)
   const [edit, setEdit] = useState(false)
   const post = trpc.useMutation(['addCharacter'])
   const update = trpc.useMutation(['updateCharacter'])
   const partyMut = trpc.useMutation(['updateParty'])
 
-  const CurrentTurn = () => {
-    return characters.filter(CurrentFilter).sort(InitCompare)
+  const currentTurn = () => {
+    return characters.filter(currentFilter).sort(initCompare)
   }
-  const NextTurn = () => {
-    return characters.filter(NextFilter).sort(InitCompare)
+
+  const nextTurn = () => {
+    return characters.filter(nextFilter).sort(initCompare)
   }
+
   const updateCharacters = async () => {
     for (let i = 0; i < characters.length; i++) {
       update.mutateAsync(characters[i] as Character)
@@ -74,9 +94,9 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
   }
 
   const next = () => {
-    const currentTurn = CurrentTurn()
-    if (currentTurn.length > 1) {
-      currentTurn[0]!.isDone = true
+    const current = currentTurn()
+    if (current.length > 1) {
+      current[0]!.isDone = true
     }
     else {
       characters.map(c => c.isDone = false)
@@ -88,14 +108,14 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
     updateCharacters()
   }
   const prev = () => {
-    const nextTurn = NextTurn()
-    if (nextTurn.length > 0 || turn > 1) {
-      if (nextTurn.length > 0) {
-        nextTurn[nextTurn.length - 1]!.isDone = false
+    const next = nextTurn()
+    if (next.length > 0 || turn > 1) {
+      if (next.length > 0) {
+        next[next.length - 1]!.isDone = false
       }
       else {
-        let currentTurn = CurrentTurn()
-        let last = currentTurn[nextTurn.length - 1]
+        let current = currentTurn()
+        let last = current[current.length - 1]
         characters.map(c => c.isDone = true)
         last!.isDone = false
         props.party.round = turn - 1
@@ -108,10 +128,10 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
 
   const currentTurnDisplay = () => {
     if (turn === 1) {
-      return CurrentTurn().slice(0, 1)
+      return currentTurn().slice(0, 1)
     }
     else {
-      return CurrentTurn()
+      return currentTurn()
     }
   }
 
@@ -119,11 +139,7 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
     return (
       <div className="App">
         <h1>Turn {turn}</h1>
-        <div className='initiativeList'>
-          {currentTurnDisplay().map(char => <CharacterDisplay character={char} key={char.id} />)}
-          <hr className='turnDivider' />
-          {NextTurn().map(char => <CharacterDisplay character={char} key={char.id} />)}
-        </div>
+        <InitiativeDisplay current={currentTurn()} next={nextTurn()} turn={turn} />
         <div className='controls'>
           <button className='btn' onClick={prev}>&lt;=</button>
           <button className='btn' onClick={next}>=&gt;</button>
@@ -156,7 +172,6 @@ const Home: NextPage = () => {
   else {
     return <h1>Loading...</h1>
   }
-
 }
 
 
