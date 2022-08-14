@@ -44,37 +44,44 @@ const EditorRow = ({ character, update, deleted }: { character: Character, updat
     }
     catch (e) {
       console.log('failed to process initiative change', e)
-
     }
   }
   return (
-    <>
-      <div className={`${character.isPlayer ? "player" : "enemy"} character`} >
-        <div className='charGrid'>
-          <div className='charName'>
-            <input value={name} onChange={nameChange} />
-          </div>
-          <div className='initiative'>
-            <button className='initiativeButton' onClick={() => changeInit(-5)}>-5</button>
-            <button className='initiativeButton' onClick={() => changeInit(-1)}>-</button>
-            <button className='initiativeButton' onClick={() => changeInit(1)}>+</button>
-            <button className='initiativeButton' onClick={() => changeInit(5)}>5</button>
-            <input typeof='number' value={initiative} onChange={initiativeChange} />
-          </div>
+    <div className='grid char-columns h-[5rem] sm:h-[2.5rem] mb-10 box-content'>
+      <div className="grid-cols-1 col-span-1 text-neutral-50 text-lg text-left m-2 rounded-lg relative p-2 w-full bg-[#99aa77]" >
+        <div className='sm:w-1/2 w-full sm:h-full h-1/2 inline-block sm:block bg-blue-500 text-left float-left'>
+          <input className='text-2xl bg-[#99aa77] w-full h-full inline-block align-middle' value={name} onChange={nameChange} />
+        </div>
+        <div className='sm:w-1/2 w-full sm:h-full h-1/2 text-right inline-block bg-[#99aa77]'>
+          <button className='m-1 p-2 bg-neutral-600 w-10 rounded-lg' onClick={() => changeInit(-5)}>-5</button>
+          <button className='m-1 p-2 bg-neutral-600 w-10 rounded-lg' onClick={() => changeInit(-1)}>-</button>
+          <button className='m-1 p-2 bg-neutral-600 w-10 rounded-lg' onClick={() => changeInit(1)}>+</button>
+          <button className='m-1 p-2 bg-neutral-600 w-10 rounded-lg' onClick={() => changeInit(5)}>5</button>
+          <input className='w-12 bg-[#99aa77] text-2xl' typeof='number' value={initiative} onChange={initiativeChange} />
         </div>
       </div >
-      <div className='outerCol'>
-        <input type='button' className='deleteButton' value='=' onClick={togglePlayer} tabIndex={9999}/>
+      <div className='grid-cols-1 col-span-1 '>
+        <input
+          type='button'
+          className='bg-neutral-600 w-20 h-12 rounded-lg ml-4 text-xl inline-block mb-2'
+          value={character.isPlayer ? "PC" : "NPCright"}
+          onClick={togglePlayer}
+          tabIndex={9999} />
         {!character.isPlayer &&
-          <input type='button' className='deleteButton' value='X' onClick={deleteCharacter} tabIndex={9999} />
+          <input
+            type='button'
+            className='bg-neutral-600 w-20 h-12 rounded-lg text-xl inline-block float-left ml-4'
+            value='X'
+            onClick={deleteCharacter}
+            tabIndex={9999} />
         }
       </div>
-    </>
+    </div>
   )
 
 }
 
-const Editor = ({ characters, updateCharacters , deleteChar }: { characters: Array<Character>, updateCharacters: () => void, deleteChar: (char: Character) => void}) => {
+const Editor = ({ characters, updateCharacters, deleteChar }: { characters: Array<Character>, updateCharacters: () => void, deleteChar: (char: Character) => void }) => {
   characters = characters.sort((a, b) => a.name.localeCompare(b.name))
   const players = characters.filter(char => char.isPlayer)
   const npc = characters.filter(char => !char.isPlayer)
@@ -87,7 +94,7 @@ const Editor = ({ characters, updateCharacters , deleteChar }: { characters: Arr
   }
 
   return (
-    <div className='initiativeList'>
+    <div className=''>
       {players.map((character: Character) => <EditorRow character={character} key={character.id} update={update} deleted={deleted} />)}
       {npc.map((character: Character) => <EditorRow character={character} key={character.id} update={update} deleted={deleted} />)}
     </div>

@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+.init-columns {
+  grid-template-columns: 5% 75% 5% 15%;
+}
+
+.char-columns {
+  grid-template-columns: 3fr 1fr;
+}
 
 body{
   background-color: #282828;

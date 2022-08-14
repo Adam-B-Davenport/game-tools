@@ -126,24 +126,15 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
     updateCharacters()
   }
 
-  const currentTurnDisplay = () => {
-    if (turn === 1) {
-      return currentTurn().slice(0, 1)
-    }
-    else {
-      return currentTurn()
-    }
-  }
-
   if (!edit) {
     return (
-      <div className="App">
-        <h1>Turn {turn}</h1>
+      <div className="container m-auto">
+        <h1 className="text-center text-5xl mt-4">Turn {turn}</h1>
         <InitiativeDisplay current={currentTurn()} next={nextTurn()} turn={turn} />
         <div className='controls'>
-          <button className='btn' onClick={prev}>&lt;=</button>
-          <button className='btn' onClick={next}>=&gt;</button>
-          <button className='btn' onClick={() => setEdit(!edit)}>≡</button>
+          <button className='text-3xl text-center pt-0 w-24 text-slate-50 bg-neutral-600 h-20 m-2 rounded-lg' onClick={prev}>&lt;=</button>
+          <button className='text-3xl text-center pt-0 w-24 text-slate-50 bg-neutral-600 h-20 m-2 rounded-lg' onClick={next}>=&gt;</button>
+          <button className='text-3xl text-center pt-0 w-24 text-slate-50 bg-neutral-600 h-20 m-2 rounded-lg' onClick={() => setEdit(!edit)}>≡</button>
         </div>
       </div>
     );
@@ -151,13 +142,13 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
   }
   else {
     return (
-      <div className="App">
-        <h1>Turn {turn}</h1>
+      <div className="container m-auto">
+        <h1 className="text-center text-5xl mt-4">Turn {turn}</h1>
         <Editor characters={characters} updateCharacters={updateCharacters} deleteChar={deleteChar} />
-        <div className='controls'>
-          <button className='btn' onClick={addChar}>+</button>
-          <button className='btn' onClick={startOver}>Reset</button>
-          <button className='btn' onClick={toggleEdit}>≡</button>
+        <div className='m-auto'>
+          <button className='text-3xl text-center pt-0 w-24 text-slate-50 bg-neutral-600 h-20 m-2 rounded-lg' onClick={addChar}>+</button>
+          <button className='text-3xl text-center pt-0 w-24 text-slate-50 bg-neutral-600 h-20 m-2 rounded-lg' onClick={startOver}>Reset</button>
+          <button className='text-3xl text-center pt-0 w-24 text-slate-50 bg-neutral-600 h-20 m-2 rounded-lg' onClick={toggleEdit}>≡</button>
         </div>
       </div>
     );
