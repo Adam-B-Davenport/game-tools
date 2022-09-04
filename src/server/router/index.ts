@@ -8,6 +8,11 @@ import { Character, Party } from '@prisma/client'
 
 export const appRouter = createRouter()
   .transformer(superjson)
+  .query("getParties", {
+    async resolve({ ctx }) {
+      return await ctx.prisma.party.findMany()
+    }
+  })
   .query("getAll", {
     async resolve({ ctx }) {
       // Todo - add party creation/selection
