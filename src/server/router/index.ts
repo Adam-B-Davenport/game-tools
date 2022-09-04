@@ -13,11 +13,22 @@ export const appRouter = createRouter()
       return await ctx.prisma.party.findMany()
     }
   })
+  .query("findParty", {
+    input: (val: unknown) => {
+      return val as string
+    },
+    async resolve({ ctx, input }) {
+      // Todo - add party creation/selection
+      let party = await ctx.prisma.party.findFirst({ where: { id: parseInt(input) } })
+      const characters = await ctx.prisma.character.findMany({ where: { partyId: parseInt(input) } });
+      return { characters: characters, party: party }
+    }
+  })
   .query("getAll", {
     async resolve({ ctx }) {
       // Todo - add party creation/selection
       let party = await ctx.prisma.party.findFirst()
-      if (party === null){
+      if (party === null) {
         party = await ctx.prisma.party.create({
           data: {
             name: "Buckleberry Bandits",
@@ -26,17 +37,17 @@ export const appRouter = createRouter()
         })
       }
       const characters = await ctx.prisma.character.findMany();
-      return {characters: characters, party: party}
+      return { characters: characters, party: party }
     }
   })
   .mutation("updateParty", {
     input: (val: unknown) => {
       return val as Party
     },
-    async resolve({input, ctx}){
+    async resolve({ input, ctx }) {
       return await ctx.prisma.party.update({
         data: input,
-        where: {id: input.id}
+        where: { id: input.id }
       })
     }
   })
@@ -45,7 +56,6 @@ export const appRouter = createRouter()
       return val as Character
     },
     async resolve({ input, ctx }) {
-      console.log("updating", input)
       return await ctx.prisma.character.update({
         data: input,
         where: { id: input.id }
@@ -63,7 +73,6 @@ export const appRouter = createRouter()
         })
       }
       catch {
-        console.log('prisma failed')
       }
     },
   })
@@ -72,17 +81,9 @@ export const appRouter = createRouter()
       return val as Character
     },
     async resolve({ input, ctx }) {
-      try {
-        return await ctx.prisma.character.create({
-          data: input
-        })
-      }
-      catch {
-        console.log('prisma failed.')
-        return await ctx.prisma.character.create({
-          data: input
-        })
-      }
+      return await ctx.prisma.character.create({
+        data: input
+      })
     },
   })
   .mutation("deleteCharacter", {
@@ -93,6 +94,19 @@ export const appRouter = createRouter()
       return await ctx.prisma.character.delete({
         where: {
           id: input
+        }
+      })
+    },
+  })
+  .mutation("createParty", {
+    input: (val: unknown) => {
+      return val as Party
+    },
+    async resolve({ input, ctx }) {
+      return await ctx.prisma.party.create({
+        data: {
+          name: input.name,
+          round: 1
         }
       })
     },

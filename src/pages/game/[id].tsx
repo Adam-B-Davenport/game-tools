@@ -1,9 +1,10 @@
 import type { NextPage } from "next";
-import { trpc } from "../utils/trpc";
+import { trpc } from "../../utils/trpc";
 import { useState } from 'react';
-import CharacterDisplay from '../components/CharacterDisplay';
-import Editor from '../components/Edit';
+import CharacterDisplay from '../../components/CharacterDisplay';
+import Editor from '../../components/Edit';
 import { Character, Party } from "@prisma/client";
+import { useRouter } from "next/router";
 
 
 const InitiativeDisplay = ({ current, next, turn }: { current: Array<Character>, next: Array<Character>, turn: number }) => {
@@ -38,9 +39,9 @@ const nextFilter = (c: Character) => {
   return c.isDone
 }
 
-const Main = (props: { chars: Array<Character>, party: Party }) => {
-  const [characters, setChars] = useState(props.chars.sort(initCompare))
-  const [turn, setTurn] = useState(props.party.round)
+const Main = ({chars, party}: { chars: Array<Character>, party: Party }) => {
+  const [characters, setChars] = useState(chars.sort(initCompare))
+  const [turn, setTurn] = useState(party.round)
   const [edit, setEdit] = useState(false)
   const post = trpc.useMutation(['addCharacter'])
   const update = trpc.useMutation(['updateCharacter'])
@@ -69,6 +70,7 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
       initiative: 0,
       isPlayer: false,
       isDone: false,
+      partyId: party.id,
     }
     char = await post.mutateAsync(char)
     setChars(characters.concat(char))
@@ -88,8 +90,8 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
     setEdit(false)
     characters.map(c => c.isDone = false)
     updateCharacters()
-    props.party.round = 1
-    partyMut.mutateAsync(props.party)
+    party.round = 1
+    partyMut.mutateAsync(party)
     setTurn(1)
   }
 
@@ -101,8 +103,8 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
     else {
       characters.map(c => c.isDone = false)
       updateCharacters()
-      props.party.round = turn + 1
-      partyMut.mutateAsync(props.party)
+      party.round = turn + 1
+      partyMut.mutateAsync(party)
       setTurn(turn + 1)
     }
     updateCharacters()
@@ -118,8 +120,8 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
         let last = current[current.length - 1]
         characters.map(c => c.isDone = true)
         last!.isDone = false
-        props.party.round = turn - 1
-        partyMut.mutateAsync(props.party)
+        party.round = turn - 1
+        partyMut.mutateAsync(party)
         setTurn(turn - 1)
       }
     }
@@ -156,7 +158,8 @@ const Main = (props: { chars: Array<Character>, party: Party }) => {
 }
 
 const Home: NextPage = () => {
-  const data = trpc.useQuery(['getAll'])
+  const router = useRouter()
+  const data = trpc.useQuery(['findParty', router.query.id as string])
   if (data.data && data.data.party !== null) {
     return <Main chars={data.data.characters} party={data.data.party} />
   }

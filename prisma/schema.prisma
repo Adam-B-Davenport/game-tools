@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+    provider      = "prisma-client-js"
     binaryTargets = ["native", "linux-musl"]
 }
 
@@ -61,16 +61,19 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
+model Party {
+    id        Int         @id @default(autoincrement())
+    name      String
+    round     Int         @default(0)
+    Character Character[]
+}
+
 model Character {
     id         Int     @id @default(autoincrement())
     name       String
     initiative Int     @default(0)
     isPlayer   Boolean @default(true)
     isDone     Boolean @default(false)
-}
-
-model Party {
-    id    Int    @id @default(autoincrement())
-    name  String
-    round Int    @default(0)
+    partyId    Int     @default(1)
+    party      Party   @relation(fields: [partyId], references: [id], onDelete: Cascade)
 }
