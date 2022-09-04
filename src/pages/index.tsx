@@ -2,13 +2,11 @@ import type { Party } from "@prisma/client";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { NextRouter, useRouter } from "next/router";
 import { trpc } from "../utils/trpc"
 
 type CardProps = {
   name: string;
   link: string;
-  router: NextRouter;
 };
 
 const Home: NextPage = () => {
@@ -18,7 +16,6 @@ const Home: NextPage = () => {
     party = partyQuery.data
   }
 
-  const router = useRouter()
   return (
     <>
       <Head>
@@ -35,9 +32,9 @@ const Home: NextPage = () => {
           {party.map(p => {
             return (
               <Card
+                key={p.id}
                 name={p.name}
                 link={`/game/${p.id}`}
-                router={router}
               />
             )
           })}
@@ -53,14 +50,15 @@ const Home: NextPage = () => {
 const Card = ({
   name,
   link,
-  router,
 }: CardProps) => {
   return (
     <section
-      onClick={() => router.push(link)}
-      className="flex flex-col justify-center p-6 duration-500 border-2 border-green-500 rounded shadow-xl motion-safe:hover:scale-105 cursor-pointer">
-      <h2 className="text-3xl text-green-700">{name}</h2>
-    </section>
+      className="flex flex-col justify-center p-6 duration-500 border-2 border-green-500 rounded shadow-xl motion-safe:hover:scale-105 cursor-pointer" >
+      <a href={link}
+        className="text-3xl text-green-700">
+        {name}
+      </a>
+    </section >
   );
 };
 
